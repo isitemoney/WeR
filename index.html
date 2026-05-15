@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daring Money</title>
+    <title>Daring Money | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #050b1a; color: #e2e8f0; margin: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            background-color: #050b1a; 
+            color: #e2e8f0; 
+            margin: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         .num-font { font-family: 'Tajawal', sans-serif; font-weight: 900; }
         .hidden { display: none !important; }
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
@@ -20,14 +28,14 @@
 </head>
 <body>
 
-    <div id="copy-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-2xl opacity-0 transition-all duration-500 z-[1000] pointer-events-none">
-        ✅ تم النسخ بنجاح!
+    <div id="copy-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-2xl opacity-0 transition-all duration-500 z-[1000] pointer-events-none shadow-2xl">
+        ✅ تم نسخ الرابط بنجاح!
     </div>
 
     <nav id="nav" class="hidden glass-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
         <div class="flex flex-col text-right">
             <h1 class="text-xl font-black text-white italic">DARING <span class="text-blue-500">MONEY</span></h1>
-            <p id="user-welcome" class="text-[10px] text-emerald-400 font-bold italic"></p>
+            <p id="user-welcome" class="text-[10px] text-emerald-400 font-bold italic tracking-wider"></p>
         </div>
         <button onclick="logout()" class="text-xs bg-red-500/10 text-red-500 px-4 py-2 rounded-xl border border-red-500/20 font-bold">خروج</button>
     </nav>
@@ -37,15 +45,15 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="glass-card p-4 rounded-2xl text-center border-b-2 border-blue-500">
                 <p class="text-blue-400 text-[10px] font-black mb-1">أرباح اليوم</p>
-                <h3 id="stat-today" class="num-font text-2xl">$0.00</h3>
+                <h3 id="stat-today" class="num-font text-2xl tracking-tighter">$0.00</h3>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center">
                 <p class="text-slate-400 text-[10px] font-black mb-1">إجمالي الأرباح</p>
-                <h3 id="stat-total" class="num-font text-2xl">$0.00</h3>
+                <h3 id="stat-total" class="num-font text-2xl tracking-tighter">$0.00</h3>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center border-b-2 border-emerald-500">
                 <p class="text-emerald-400 text-[10px] font-black mb-1 underline">القابل للسحب</p>
-                <h3 id="stat-withdrawable" class="num-font text-2xl text-emerald-400">$0.00</h3>
+                <h3 id="stat-withdrawable" class="num-font text-2xl text-emerald-400 tracking-tighter">$0.00</h3>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center">
                 <p class="text-purple-400 text-[10px] font-black mb-1">النقرات</p>
@@ -53,50 +61,48 @@
             </div>
         </div>
 
-        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-blue-500">
-            <h4 class="font-bold text-xs text-slate-300 mb-2 italic">🔗 رابطك الخاص</h4>
+        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-blue-500 shadow-xl">
+            <h4 class="font-bold text-xs text-slate-300 mb-2 italic">🔗 رابطك التسويقي الحصري</h4>
             <div class="flex bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-1">
-                <input type="text" id="ref-link" readonly class="bg-transparent px-3 flex-1 text-[11px] outline-none text-blue-300 font-bold">
-                <button onclick="copyRef()" class="btn-primary px-6 py-2 rounded-xl text-xs font-black text-white">نسخ</button>
+                <input type="text" id="ref-link" readonly class="bg-transparent px-3 flex-1 text-[11px] outline-none text-blue-300 font-bold" value="جاري التحميل...">
+                <button onclick="copyRef()" class="btn-primary px-6 py-2 rounded-xl text-xs font-black text-white active:scale-95">نسخ</button>
             </div>
         </div>
 
-        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-emerald-500">
-            <h4 class="font-bold text-sm text-emerald-400 mb-6 italic">💰 طلب سحب</h4>
-            <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select id="w-method" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
-                        <option value="زين كاش">زين كاش</option>
-                        <option value="رصيد آسيا">رصيد آسيا</option>
-                        <option value="USDT">USDT (TRC20)</option>
-                    </select>
-                    <input type="text" id="w-account" placeholder="رقم الهاتف أو المحفظة" class="w-full p-4 rounded-2xl text-xs text-right font-bold outline-none">
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="number" id="w-amount" placeholder="المبلغ (الأدنى 7$)" class="w-full p-4 rounded-2xl text-xs text-right font-bold outline-none">
-                    <input type="text" id="w-contact" placeholder="يوزر التليجرام" class="w-full p-4 rounded-2xl text-xs text-right font-bold outline-none">
-                </div>
-                <button onclick="confirmWithdraw()" class="btn-primary w-full py-4 rounded-2xl font-black text-white shadow-lg active:scale-95">تأكيد السحب</button>
+        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-emerald-500 shadow-xl">
+            <h4 class="font-bold text-sm text-emerald-400 mb-6 italic">💰 تقديم طلب سحب رصيد</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <select id="w-method" class="p-4 rounded-2xl text-xs font-bold outline-none">
+                    <option value="زين كاش">زين كاش</option>
+                    <option value="رصيد آسيا">رصيد آسيا</option>
+                    <option value="USDT">USDT (TRC20)</option>
+                </select>
+                <input type="text" id="w-account" placeholder="رقم الهاتف أو عنوان المحفظة" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <input type="number" id="w-amount" placeholder="المبلغ (الأدنى 7$)" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
+                <input type="text" id="w-contact" placeholder="يوزر التليجرام الخاص بك" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
+            </div>
+            <button onclick="confirmWithdraw()" class="btn-primary w-full py-4 rounded-2xl font-black text-white shadow-lg active:scale-95 text-sm">تأكيد وإرسال الطلب</button>
         </div>
 
-        <div class="glass-card p-6 rounded-[2rem]">
-            <h4 class="text-[10px] font-black mb-4 text-slate-500 uppercase tracking-widest italic">📋 سجل سحوباتك</h4>
-            <div id="user-withdraw-history" class="space-y-3">
-                <p class='text-[10px] text-slate-600 text-center py-4 italic'>جاري المزامنة...</p>
+        <div class="glass-card p-6 rounded-[2rem] shadow-xl">
+            <h4 class="text-[10px] font-black mb-4 text-slate-500 uppercase tracking-widest italic">📋 سجل السحوبات الخاص بك</h4>
+            <div id="user-withdraw-history" class="space-y-3 min-h-[100px]">
+                <p class='text-[10px] text-slate-600 text-center py-8 italic'>جاري مزامنة السجلات...</p>
             </div>
         </div>
     </div>
 
     <div id="auth-section" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="glass-card p-8 rounded-[2.5rem] w-full max-w-md text-center border-t-4 border-blue-500">
+        <div class="glass-card p-8 rounded-[2.5rem] w-full max-w-md text-center border-t-4 border-blue-500 shadow-2xl">
             <h2 class="text-3xl font-black text-white italic mb-8">DARING <span class="text-blue-500">MONEY</span></h2>
             <div class="space-y-4">
-                <input type="text" id="username" placeholder="اسم المستخدم" class="hidden w-full p-4 rounded-2xl outline-none text-sm text-right">
+                <input type="text" id="username" placeholder="اسم المروج" class="hidden w-full p-4 rounded-2xl outline-none text-sm text-right font-bold">
                 <input type="email" id="email" placeholder="البريد الإلكتروني" class="w-full p-4 rounded-2xl outline-none text-sm text-left">
                 <input type="password" id="password" placeholder="كلمة المرور" class="w-full p-4 rounded-2xl outline-none text-sm text-left">
-                <button onclick="handleAuth()" id="auth-btn" class="btn-primary w-full py-4 rounded-2xl font-black text-white">دخول</button>
-                <p onclick="toggleAuthMode()" id="auth-switch" class="text-slate-500 text-xs font-bold cursor-pointer underline mt-4">سجل حساب جديد</p>
+                <button onclick="handleAuth()" id="auth-btn" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-base">دخول</button>
+                <p onclick="toggleAuthMode()" id="auth-switch" class="text-slate-500 text-xs font-bold cursor-pointer underline mt-4">ليس لديك حساب؟ انضم إلينا</p>
             </div>
         </div>
     </div>
@@ -106,7 +112,7 @@
             <div class="absolute inset-0 border-4 border-blue-500/10 rounded-full"></div>
             <div class="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div>
         </div>
-        <p class="text-slate-200 font-bold text-lg">جاري فحص الأمان...</p>
+        <p class="text-slate-200 font-bold text-lg">جاري فحص رابط الأمان...</p>
     </div>
 
     <script>
@@ -128,28 +134,64 @@
         let currentUserData = null;
         let isLoginMode = true;
 
-        // دالة التصفير الساعة 3 فجراً
+        // 1. نظام تصفير الرصيد الساعة 3 الفجر
         function checkAndResetDaily(uid, data) {
             const now = new Date();
             let resetTime = new Date();
             resetTime.setHours(3, 0, 0, 0);
             
-            // إذا كان الوقت الآن قبل الساعة 3 الفجر، نرجع يوم واحد للخلف للحساب الصحيح
             if (now.getHours() < 3) resetTime.setDate(resetTime.getDate() - 1);
 
             const lastReset = data.lastResetDate || 0;
             if (lastReset < resetTime.getTime()) {
-                const todayProfit = data.todayBalance || 0;
+                const profitToMove = data.todayBalance || 0;
                 db.ref('users/' + uid).update({
                     todayBalance: 0,
-                    withdrawableBalance: Number(((data.withdrawableBalance || 0) + todayProfit).toFixed(2)),
+                    withdrawableBalance: Number(((data.withdrawableBalance || 0) + profitToMove).toFixed(2)),
                     lastResetDate: Date.now()
                 });
             }
         }
 
+        // 2. تحميل وعرض السجلات (حل مشكلة عدم الظهور)
+        function loadWithdrawalHistory(uid) {
+            db.ref('withdrawals').on('value', snap => {
+                const list = document.getElementById('user-withdraw-history');
+                const data = snap.val();
+                list.innerHTML = "";
+
+                if (!data) {
+                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات مسجلة حالياً.</p>";
+                    return;
+                }
+
+                // فلترة يدوية في المتصفح لضمان ظهور النتائج فوراً
+                const myWithdraws = Object.keys(data)
+                    .map(key => ({ id: key, ...data[key] }))
+                    .filter(w => w.uid === uid)
+                    .sort((a, b) => b.timestamp - a.timestamp);
+
+                if (myWithdraws.length === 0) {
+                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات سابقة.</p>";
+                    return;
+                }
+
+                myWithdraws.forEach(w => {
+                    const sText = w.status === 'paid' ? 'تم الدفع ✅' : 'قيد الانتظار ⏳';
+                    const sColor = w.status === 'paid' ? 'text-emerald-400' : 'text-amber-400';
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center glass-card p-4 rounded-xl border border-slate-800 mb-2 animate-fade-in">
+                            <div class="text-right">
+                                <p class="num-font font-bold text-white text-lg">$${Number(w.amount).toFixed(2)}</p>
+                                <p class="text-[9px] text-slate-500 font-bold">${w.method} | ${new Date(w.timestamp).toLocaleDateString('ar-EG')}</p>
+                            </div>
+                            <div class="text-[10px] font-bold ${sColor} underline italic">${sText}</div>
+                        </div>`;
+                });
+            });
+        }
+
         function loadData(user) {
-            // بيانات المروج
             db.ref('users/' + user.uid).on('value', snap => {
                 const d = snap.val(); if (!d) return;
                 currentUserData = d;
@@ -158,52 +200,42 @@
                 document.getElementById('stat-total').innerText = `$${(d.totalBalance || 0).toFixed(2)}`;
                 document.getElementById('stat-withdrawable').innerText = `$${(d.withdrawableBalance || 0).toFixed(2)}`;
                 document.getElementById('stat-clicks').innerText = d.clicks || 0;
-                document.getElementById('user-welcome').innerText = "أهلاً، " + d.username;
+                document.getElementById('user-welcome').innerText = "مرحباً مروج، " + d.username;
                 document.getElementById('ref-link').value = window.location.origin + window.location.pathname + "?id=" + user.uid;
             });
+            loadWithdrawalHistory(user.uid);
+        }
 
-            // سجل السحوبات - الحل المباشر
-            db.ref('withdrawals').on('value', snap => {
-                const list = document.getElementById('user-withdraw-history');
-                const data = snap.val();
-                list.innerHTML = "";
+        function confirmWithdraw() {
+            const amount = parseFloat(document.getElementById('w-amount').value);
+            const method = document.getElementById('w-method').value;
+            const account = document.getElementById('w-account').value;
+            const contact = document.getElementById('w-contact').value;
 
-                if (!data) {
-                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات مسجلة.</p>";
-                    return;
-                }
+            if (amount < 7 || isNaN(amount)) return alert("الحد الأدنى للسحب هو 7$");
+            if (amount > (currentUserData.withdrawableBalance || 0)) return alert("عذراً، رصيدك القابل للسحب حالياً لا يكفي لهذا المبلغ.");
 
-                // فلترة يدوية فورية لضمان الظهور
-                const myHistory = [];
-                for (let key in data) {
-                    if (data[key].uid === user.uid) {
-                        myHistory.push({ id: key, ...data[key] });
-                    }
-                }
-
-                if (myHistory.length === 0) {
-                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات مسجلة.</p>";
-                    return;
-                }
-
-                // ترتيب الأحدث أولاً
-                myHistory.sort((a, b) => b.timestamp - a.timestamp);
-
-                myHistory.forEach(w => {
-                    const statusText = w.status === 'paid' ? 'تم الدفع ✅' : 'قيد الانتظار ⏳';
-                    const statusColor = w.status === 'paid' ? 'text-emerald-400' : 'text-amber-400';
-                    list.innerHTML += `
-                        <div class="flex justify-between items-center glass-card p-4 rounded-xl border border-slate-800 mb-2">
-                            <div class="text-right">
-                                <p class="num-font font-bold text-white text-lg">$${Number(w.amount).toFixed(2)}</p>
-                                <p class="text-[9px] text-slate-500 font-bold">${w.method} | ${new Date(w.timestamp).toLocaleDateString()}</p>
-                            </div>
-                            <div class="text-[10px] font-bold ${statusColor} underline italic">${statusText}</div>
-                        </div>`;
+            db.ref('users/' + auth.currentUser.uid).transaction(d => {
+                if (d) d.withdrawableBalance = Number((d.withdrawableBalance - amount).toFixed(2));
+                return d;
+            }).then(() => {
+                db.ref('withdrawals').push({
+                    uid: auth.currentUser.uid,
+                    amount: amount,
+                    method: method,
+                    account: account,
+                    contact: contact,
+                    status: 'pending',
+                    timestamp: Date.now()
                 });
+                alert("✅ تم إرسال طلب السحب بنجاح!\nتتم المراجعة وتأكيد الدفع خلال 24-72 ساعة، يرجى الانتظار.");
+                document.getElementById('w-amount').value = "";
+                document.getElementById('w-account').value = "";
+                document.getElementById('w-contact').value = "";
             });
         }
 
+        // معالجة الزيارات والنقرات
         async function handleVisitor(id) {
             try {
                 const ipRes = await fetch('https://api.ipify.org?format=json');
@@ -223,7 +255,6 @@
                             d.clicks = (d.clicks || 0) + 1;
                             d.todayBalance = Number(((d.todayBalance || 0) + CLICK_PRICE).toFixed(2));
                             d.totalBalance = Number(((d.totalBalance || 0) + CLICK_PRICE).toFixed(2));
-                            // القابل للسحب (withdrawableBalance) لا يزيد هنا، يزيد الساعة 3 الفجر فقط
                         }
                         return d;
                     });
@@ -236,33 +267,6 @@
             const snap = await ref.once('value');
             const link = (snap.val() && snap.val().marketingLink) ? snap.val().marketingLink : DEFAULT_LINK;
             setTimeout(() => { window.location.href = link; }, 2000);
-        }
-
-        function confirmWithdraw() {
-            const amount = parseFloat(document.getElementById('w-amount').value);
-            const method = document.getElementById('w-method').value;
-            const account = document.getElementById('w-account').value;
-            const contact = document.getElementById('w-contact').value;
-
-            if (amount < 7 || isNaN(amount)) return alert("الحد الأدنى للسحب 7$");
-            if (amount > (currentUserData.withdrawableBalance || 0)) return alert("رصيدك القابل للسحب لا يكفي حالياً.");
-
-            db.ref('users/' + auth.currentUser.uid).transaction(d => {
-                if (d) d.withdrawableBalance = Number((d.withdrawableBalance - amount).toFixed(2));
-                return d;
-            }).then(() => {
-                db.ref('withdrawals').push({
-                    uid: auth.currentUser.uid,
-                    amount: amount,
-                    method: method,
-                    account: account,
-                    contact: contact,
-                    status: 'pending',
-                    timestamp: Date.now()
-                });
-                alert("✅ تم إرسال طلب السحب بنجاح!\nسيظهر في السجل أدناه فوراً.");
-                document.getElementById('w-amount').value = "";
-            });
         }
 
         function copyRef() {
