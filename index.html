@@ -3,317 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daring Money | Dashboard</title>
+    <title>Daring Money | اربح المال من نشر الروابط</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        
-        body { 
-            font-family: 'Tajawal', sans-serif; 
-            background-color: #050b1a; 
-            color: #e2e8f0; 
-            margin: 0; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .num-font { font-family: 'Tajawal', sans-serif; font-weight: 900; }
-        .hidden { display: none !important; }
+        body { font-family: 'Tajawal', sans-serif; background: #050b1a; color: #e2e8f0; margin: 0; }
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s ease; }
-        input, select { background: rgba(30, 41, 59, 0.5) !important; border: 1px solid rgba(71, 85, 105, 0.5) !important; color: white !important; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s; }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); transition: all 0.2s; }
+        .btn-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); transition: all 0.2s; }
+        .btn-google { background: #fff; color: #1a1a1a; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 900; }
+        .btn-google:hover { background: #f1f1f1; }
+        input, select { background: #0f172a !important; border: 1px solid #1e293b !important; color: white !important; }
+        .level-bronze { color: #cd7f32; }
+        .level-silver { color: #c0c0c0; }
+        .level-gold { color: #ffd700; }
+        .level-diamond { color: #b9f2ff; }
+        #secret-indicator { position: fixed; bottom: 20px; left: 20px; z-index: 9999; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 2rem; padding: 2rem; max-width: 500px; width: 100%; text-align: center; }
+        .fake-notification { position: fixed; bottom: 100px; left: 20px; z-index: 9998; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(34, 197, 94, 0.3); border-right: 3px solid #22c55e; padding: 12px 16px; border-radius: 16px; min-width: 250px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: slideInLeft 0.5s ease-out, fadeOut 0.5s ease-in 4.5s forwards; display: flex; align-items: center; gap: 10px; }
+        @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-20px); } }
+        .top-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(59, 130, 246, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { border-color: rgba(59, 130, 246, 0.3); } 50% { border-color: rgba(59, 130, 246, 0.7); } }
+        .hero-gradient { background: linear-gradient(180deg, rgba(59,130,246,0.15) 0%, transparent 100%); }
+        .divider { display: flex; align-items: center; gap: 10px; color: #475569; font-size: 11px; font-weight: bold; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #1e293b; }
     </style>
 </head>
 <body>
 
-    <div id="copy-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-2xl opacity-0 transition-all duration-500 z-[1000] pointer-events-none shadow-2xl">
-        ✅ تم نسخ الرابط بنجاح!
+<div id="top-banner" class="hidden top-banner text-center py-3 px-4 cursor-pointer" onclick="handleBannerClick()">
+    <p id="banner-text" class="text-sm font-black text-blue-400"></p>
+</div>
+
+<nav id="nav" class="hidden glass-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
+    <div class="flex flex-col text-right">
+        <h1 id="logo" class="text-xl font-black italic cursor-pointer select-none" onclick="handleSecretTap()">DARING <span class="text-blue-500">MONEY</span></h1>
+        <p id="welcome-msg" class="text-[10px] text-slate-400 font-bold italic"></p>
     </div>
+    <div class="flex gap-2">
+        <button onclick="showThemes()" class="bg-purple-500/20 text-purple-400 px-3 py-2 rounded-xl text-[10px] font-bold border border-purple-500/30">🎨</button>
+        <a href="https://t.me/eruuiyl" target="_blank" class="bg-blue-500/20 text-blue-400 px-3 py-2 rounded-xl text-[10px] font-bold border border-blue-500/30">الدعم الفني</a>
+        <button onclick="logout()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-xl text-xs font-black">خروج</button>
+    </div>
+</nav>
 
-    <nav id="nav" class="hidden glass-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
-        <div class="flex flex-col text-right">
-            <h1 class="text-xl font-black text-white italic">DARING <span class="text-blue-500">MONEY</span></h1>
-            <p id="user-welcome" class="text-[10px] text-emerald-400 font-bold italic tracking-wider"></p>
-        </div>
-        <button onclick="logout()" class="text-xs bg-red-500/10 text-red-500 px-4 py-2 rounded-xl border border-red-500/20 font-bold">خروج</button>
-    </nav>
+<div id="secret-indicator" class="hidden text-[10px] font-black text-amber-400 bg-slate-900/80 px-3 py-2 rounded-xl"></div>
 
-    <div id="dashboard-section" class="hidden max-w-4xl mx-auto p-4 space-y-6">
+<div id="loading-screen" class="hidden fixed inset-0 z-[100] bg-[#050b1a] flex flex-col items-center justify-center text-center p-6">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500 mb-4"></div>
+    <p class="text-blue-400 font-bold">جاري تحويلك للرابط الحصري...</p>
+</div>
+
+<!-- ========== صفحة تسجيل الدخول ========== -->
+<div id="auth-section" class="min-h-screen flex items-center justify-center p-4 hero-gradient">
+    <div class="glass-card p-8 rounded-[2.5rem] w-full max-w-md border-t-4 border-blue-500 shadow-2xl text-center">
+        <div class="text-5xl mb-4">💰</div>
+        <h2 class="text-3xl font-black mb-1 italic">DARING <span class="text-blue-500">MONEY</span></h2>
+        <p class="text-[11px] text-slate-400 font-bold mb-6">اربح المال من خلال نشر الروابط وجلب الزوار</p>
         
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="glass-card p-4 rounded-2xl text-center border-b-2 border-blue-500">
-                <p class="text-blue-400 text-[10px] font-black mb-1">أرباح اليوم</p>
-                <h3 id="stat-today" class="num-font text-2xl tracking-tighter">$0.00</h3>
-            </div>
-            <div class="glass-card p-4 rounded-2xl text-center">
-                <p class="text-slate-400 text-[10px] font-black mb-1">إجمالي الأرباح</p>
-                <h3 id="stat-total" class="num-font text-2xl tracking-tighter">$0.00</h3>
-            </div>
-            <div class="glass-card p-4 rounded-2xl text-center border-b-2 border-emerald-500">
-                <p class="text-emerald-400 text-[10px] font-black mb-1 underline">القابل للسحب</p>
-                <h3 id="stat-withdrawable" class="num-font text-2xl text-emerald-400 tracking-tighter">$0.00</h3>
-            </div>
-            <div class="glass-card p-4 rounded-2xl text-center">
-                <p class="text-purple-400 text-[10px] font-black mb-1">النقرات</p>
-                <h3 id="stat-clicks" class="num-font text-2xl text-white">0</h3>
-            </div>
+        <!-- زر Google -->
+        <button onclick="signInWithGoogle()" class="btn-google w-full py-4 rounded-2xl text-sm shadow-lg mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            متابعة باستخدام Google
+        </button>
+        
+        <div class="divider mb-3">أو</div>
+        
+        <!-- دخول بالبريد (فقط) -->
+        <div class="space-y-3">
+            <input type="email" id="email" placeholder="البريد الإلكتروني" class="w-full p-4 rounded-2xl outline-none text-left">
+            <input type="password" id="password" placeholder="كلمة المرور" class="w-full p-4 rounded-2xl outline-none text-left">
+            <button onclick="signInWithEmail()" class="btn-primary w-full py-4 rounded-2xl font-black text-lg">دخول</button>
         </div>
-
-        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-blue-500 shadow-xl">
-            <h4 class="font-bold text-xs text-slate-300 mb-2 italic">🔗 رابطك التسويقي الحصري</h4>
-            <div class="flex bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-1">
-                <input type="text" id="ref-link" readonly class="bg-transparent px-3 flex-1 text-[11px] outline-none text-blue-300 font-bold" value="جاري التحميل...">
-                <button onclick="copyRef()" class="btn-primary px-6 py-2 rounded-xl text-xs font-black text-white active:scale-95">نسخ</button>
-            </div>
+        
+        <p class="text-[9px] text-slate-600 mt-4">ليس لديك حساب؟ لا تقلق، سجّل دخولك باستخدام Google أعلاه</p>
+        
+        <!-- إحصائيات تحفيزية -->
+        <div class="grid grid-cols-3 gap-3 mt-6 pt-4 border-t border-white/5">
+            <div><p class="text-emerald-400 font-black text-lg">$12.5K+</p><p class="text-[8px] text-slate-500">مدفوع للمستخدمين</p></div>
+            <div><p class="text-blue-400 font-black text-lg">8.2K+</p><p class="text-[8px] text-slate-500">مستخدم نشط</p></div>
+            <div><p class="text-purple-400 font-black text-lg">24/7</p><p class="text-[8px] text-slate-500">دعم فني</p></div>
         </div>
+    </div>
+</div>
 
-        <div class="glass-card p-6 rounded-[2rem] border-r-4 border-emerald-500 shadow-xl">
-            <h4 class="font-bold text-sm text-emerald-400 mb-6 italic">💰 تقديم طلب سحب رصيد</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <select id="w-method" class="p-4 rounded-2xl text-xs font-bold outline-none">
-                    <option value="زين كاش">زين كاش</option>
-                    <option value="رصيد آسيا">رصيد آسيا</option>
-                    <option value="USDT">USDT (TRC20)</option>
-                </select>
-                <input type="text" id="w-account" placeholder="رقم الهاتف أو عنوان المحفظة" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <input type="number" id="w-amount" placeholder="المبلغ (الأدنى 7$)" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
-                <input type="text" id="w-contact" placeholder="يوزر التليجرام الخاص بك" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
-            </div>
-            <button onclick="confirmWithdraw()" class="btn-primary w-full py-4 rounded-2xl font-black text-white shadow-lg active:scale-95 text-sm">تأكيد وإرسال الطلب</button>
+<!-- ========== لوحة التحكم ========== -->
+<div id="dashboard-section" class="hidden max-w-5xl mx-auto p-4 space-y-6">
+    <div class="glass-card p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center">
+        <div>
+            <p class="text-[10px] text-slate-400 font-bold">🏆 مستواك</p>
+            <h3 id="user-level" class="text-lg font-black level-bronze">برونزي</h3>
+            <p id="next-level" class="text-[9px] text-slate-500">تحتاج 50 نقرة للمستوى الفضي</p>
         </div>
+        <button onclick="claimDailyBonus()" id="bonus-btn" class="btn-gold px-4 py-3 rounded-2xl font-black text-sm shadow-lg">🎁 مكافأة اليوم</button>
+    </div>
 
-        <div class="glass-card p-6 rounded-[2rem] shadow-xl">
-            <h4 class="text-[10px] font-black mb-4 text-slate-500 uppercase tracking-widest italic">📋 سجل السحوبات الخاص بك</h4>
-            <div id="user-withdraw-history" class="space-y-3 min-h-[100px]">
-                <p class='text-[10px] text-slate-600 text-center py-8 italic'>جاري مزامنة السجلات...</p>
-            </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-center">
+        <div class="glass-card p-4 rounded-2xl border-b-2 border-blue-500"><p class="text-blue-400 text-[10px] font-black italic uppercase">أرباح اليوم</p><h3 id="stat-today" class="text-2xl tracking-tighter">$0.00</h3></div>
+        <div class="glass-card p-4 rounded-2xl shadow-lg"><p class="text-slate-400 text-[10px] font-black italic uppercase">إجمالي الأرباح</p><h3 id="stat-total" class="text-2xl tracking-tighter">$0.00</h3></div>
+        <div class="glass-card p-4 rounded-2xl border-b-2 border-emerald-500 shadow-lg"><p class="text-emerald-400 text-[10px] font-black underline italic uppercase">القابل للسحب</p><h3 id="stat-withdrawable" class="text-2xl text-emerald-400 tracking-tighter">$0.00</h3></div>
+        <div class="glass-card p-4 rounded-2xl shadow-lg"><p class="text-purple-400 text-[10px] font-black italic uppercase">النقرات</p><h3 id="stat-clicks" class="text-2xl">0</h3></div>
+    </div>
+
+    <div class="glass-card p-4 rounded-2xl border border-purple-500/30">
+        <h4 class="font-bold text-xs text-purple-400 mb-3 italic uppercase">👥 فريقك</h4>
+        <div class="grid grid-cols-2 gap-3 text-center text-[10px]">
+            <div><p class="text-slate-400 font-bold">عدد المُحالين</p><h3 id="stat-referrals" class="text-lg font-black text-purple-400">0</h3></div>
+            <div><p class="text-slate-400 font-bold">أرباح الإحالة</p><h3 id="stat-ref-earnings" class="text-lg font-black text-purple-400">$0.00</h3></div>
         </div>
     </div>
 
-    <div id="auth-section" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="glass-card p-8 rounded-[2.5rem] w-full max-w-md text-center border-t-4 border-blue-500 shadow-2xl">
-            <h2 class="text-3xl font-black text-white italic mb-8">DARING <span class="text-blue-500">MONEY</span></h2>
-            <div class="space-y-4">
-                <input type="text" id="username" placeholder="اسم المروج" class="hidden w-full p-4 rounded-2xl outline-none text-sm text-right font-bold">
-                <input type="email" id="email" placeholder="البريد الإلكتروني" class="w-full p-4 rounded-2xl outline-none text-sm text-left">
-                <input type="password" id="password" placeholder="كلمة المرور" class="w-full p-4 rounded-2xl outline-none text-sm text-left">
-                <button onclick="handleAuth()" id="auth-btn" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-base">دخول</button>
-                <p onclick="toggleAuthMode()" id="auth-switch" class="text-slate-500 text-xs font-bold cursor-pointer underline mt-4">ليس لديك حساب؟ انضم إلينا</p>
-            </div>
+    <div class="glass-card p-6 rounded-[2rem] border-r-4 border-blue-500 shadow-xl">
+        <h4 class="font-bold text-xs text-blue-400 mb-4 italic uppercase tracking-widest">🚀 رابطك التسويقي (للنقرات)</h4>
+        <p class="text-[9px] text-slate-500 font-bold mb-2">انشر هذا الرابط لتحصل على أرباح مقابل كل نقرة من زائر جديد</p>
+        <div class="flex gap-2 bg-slate-950 p-1 rounded-2xl border border-blue-500/20">
+            <input id="short-link" readonly class="w-full bg-transparent p-3 text-[10px] outline-none text-blue-300 font-bold">
+            <button onclick="copyShortLink()" class="btn-primary px-4 rounded-xl font-black text-xs text-white">نسخ</button>
+        </div>
+        <p class="text-[8px] text-slate-600 mt-2">كل نقرة من جهاز جديد = ربح لك 💰</p>
+    </div>
+
+    <div class="glass-card p-6 rounded-[2rem] border-r-4 border-purple-500 shadow-xl">
+        <h4 class="font-bold text-xs text-purple-400 mb-4 italic uppercase tracking-widest">👥 رابط الإحالة (لدعوة المسوّقين)</h4>
+        <p class="text-[9px] text-slate-500 font-bold mb-2">انشر هذا الرابط لدعوة أصدقائك للتسجيل والربح من أرباحهم (10%)</p>
+        <div class="flex gap-2 bg-slate-950 p-1 rounded-2xl border border-purple-500/20">
+            <input id="ref-link" readonly class="w-full bg-transparent p-3 text-[10px] outline-none text-purple-300 font-bold">
+            <button onclick="copyReferralLink()" class="bg-purple-600 px-4 rounded-xl font-black text-xs text-white">نسخ</button>
+        </div>
+        <p class="text-[8px] text-slate-600 mt-2">المسجلون عن طريقك يظهرون في فريقك 👥 وتربح 10% من أرباحهم</p>
+    </div>
+
+    <div class="glass-card p-6 rounded-[2rem] border-r-4 border-emerald-500 shadow-xl">
+        <h4 class="font-bold text-sm text-emerald-400 mb-6 italic uppercase">💰 طلب سحب جديد</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <select id="w-method" class="p-4 rounded-2xl text-xs font-bold outline-none"><option value="زين كاش">زين كاش</option><option value="رصيد آسيا">رصيد آسيا</option><option value="USDT">USDT (TRC20)</option></select>
+            <input type="text" id="w-account" placeholder="رقم الحساب أو المحفظة" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
+            <input type="number" id="w-amount" placeholder="المبلغ (الأدنى 7$)" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
+            <input type="text" id="w-contact" placeholder="يوزر التليجرام الخاص بك" class="p-4 rounded-2xl text-xs text-right font-bold outline-none">
+        </div>
+        <button onclick="confirmWithdraw()" class="btn-primary w-full py-4 mt-4 rounded-2xl font-black text-white shadow-lg">تأكيد السحب</button>
+    </div>
+
+    <div class="glass-card p-6 rounded-[2rem] shadow-xl border border-cyan-500/30">
+        <h4 class="text-[10px] font-black mb-4 text-cyan-400 italic uppercase tracking-widest">📅 سجل الأيام المفصل</h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-[10px] text-right border-collapse">
+                <thead><tr class="text-slate-400 border-b border-white/10"><th class="p-2">التاريخ</th><th class="p-2">النقرات</th><th class="p-2">الأرباح</th><th class="p-2">أرباح الإحالة</th><th class="p-2">سعر الضغطة</th></tr></thead>
+                <tbody id="daily-log-body"><tr><td colspan="5" class="p-4 text-center text-slate-500">لا يوجد سجل بعد</td></tr></tbody>
+            </table>
         </div>
     </div>
 
-    <div id="redirect-screen" class="hidden fixed inset-0 z-[10000] bg-[#050b1a] flex flex-col items-center justify-center p-6 text-center">
-        <div class="relative w-16 h-16 mb-6">
-            <div class="absolute inset-0 border-4 border-blue-500/10 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div>
+    <div class="glass-card p-6 rounded-[2rem] shadow-xl">
+        <h4 class="text-[10px] font-black mb-4 text-slate-500 italic uppercase tracking-widest">📋 سجل السحوبات المباشر</h4>
+        <div id="user-withdraw-history" class="space-y-3 min-h-[100px]"></div>
+    </div>
+</div>
+
+<!-- ========== لوحة الأدمن ========== -->
+<div id="admin-panel" class="hidden max-w-5xl mx-auto p-4 py-10 border-t border-red-500/20 space-y-6">
+    <div class="glass-card p-6 rounded-[2rem] border border-amber-500/30">
+        <h2 class="text-xl font-black text-amber-400 mb-4 italic uppercase">📢 إدارة البانر الإعلاني</h2>
+        <div class="flex flex-col gap-4">
+            <p class="text-xs text-slate-400 font-bold">نص الإعلان:</p>
+            <div class="flex gap-2"><input type="text" id="admin-banner-text" placeholder="نص الإعلان..." class="w-full p-4 rounded-2xl text-xs font-bold outline-none"><button onclick="updateBanner()" class="bg-amber-500 text-black px-6 rounded-2xl font-black text-xs">تحديث</button></div>
+            <input type="text" id="admin-banner-link" placeholder="رابط الإعلان (اختياري)" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
+            <button onclick="toggleBanner()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black">إخفاء / إظهار البانر</button>
         </div>
-        <p class="text-slate-200 font-bold text-lg">جاري فحص رابط الأمان...</p>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnkJf-6sAeRJpm34yXLmklLwSxM-GJvUc",
-            authDomain: "my-dash-c78e3.firebaseapp.com",
-            databaseURL: "https://my-dash-c78e3-default-rtdb.firebaseio.com",
-            projectId: "my-dash-c78e3",
-            storageBucket: "my-dash-c78e3.firebasestorage.app",
-            messagingSenderId: "137154835768",
-            appId: "1:137154835768:web:7f396782de1300f9bdfdcd"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
-        const CLICK_PRICE = 0.02;
-        const DEFAULT_LINK = "https://hp.funroom.store/a/8nw6emt2";
+    <div class="glass-card p-6 rounded-[2rem] border border-blue-500/30">
+        <h2 class="text-xl font-black text-blue-400 mb-4 italic uppercase">إدارة الروابط والتحويل</h2>
+        <div class="flex flex-col gap-4">
+            <p class="text-xs text-slate-400 font-bold">الرابط الحالي:</p>
+            <div class="flex gap-2"><input type="text" id="admin-new-link" placeholder="ضع الرابط الجديد هنا..." class="w-full p-4 rounded-2xl text-xs font-bold outline-none"><button onclick="updateGlobalLink()" class="btn-primary px-6 rounded-2xl font-black text-xs">تحديث</button></div>
+            <p id="current-link-display" class="text-[10px] text-emerald-400 font-mono"></p>
+        </div>
+    </div>
 
-        let currentUserData = null;
-        let isLoginMode = true;
+    <div class="glass-card p-6 rounded-[2rem] border border-purple-500/30">
+        <h2 class="text-xl font-black text-purple-400 mb-4 italic uppercase">📊 إحصائيات متقدمة</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-center text-[10px]">
+            <div><p class="text-slate-400 font-bold">مجموع النقرات</p><h3 id="admin-total-clicks" class="text-lg font-black text-white">0</h3></div>
+            <div><p class="text-slate-400 font-bold">المسوّقين النشطين</p><h3 id="admin-active-users" class="text-lg font-black text-purple-400">0</h3></div>
+            <div><p class="text-slate-400 font-bold">أعلى مسوّق</p><h3 id="admin-top-earner" class="text-lg font-black text-amber-400">-</h3></div>
+            <div><p class="text-slate-400 font-bold">طلبات معلقة</p><h3 id="admin-pending-count" class="text-lg font-black text-red-400">0</h3></div>
+        </div>
+    </div>
 
-        // 1. نظام تصفير الرصيد الساعة 3 الفجر
-        function checkAndResetDaily(uid, data) {
-            const now = new Date();
-            let resetTime = new Date();
-            resetTime.setHours(3, 0, 0, 0);
-            
-            if (now.getHours() < 3) resetTime.setDate(resetTime.getDate() - 1);
+    <div class="glass-card p-6 rounded-[2rem] border border-red-500/30">
+        <h2 class="text-xl font-black text-red-500 mb-6 italic uppercase underline tracking-tighter">طلبات السحب المعلقة</h2>
+        <div id="admin-withdrawals" class="space-y-4"></div>
+    </div>
+</div>
 
-            const lastReset = data.lastResetDate || 0;
-            if (lastReset < resetTime.getTime()) {
-                const profitToMove = data.todayBalance || 0;
-                db.ref('users/' + uid).update({
+<div id="withdraw-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <div class="text-5xl mb-4">⏳</div>
+        <h3 class="text-xl font-black text-amber-400 mb-2">تم استلام طلبك بنجاح!</h3>
+        <p class="text-sm text-slate-300 mb-4">يرجى التحلي بالصبر، سوف تتم معالجة طلبك في أقرب وقت ممكن.</p>
+        <p class="text-[10px] text-slate-500 mb-6">للاستفسار تواصل مع الدعم الفني على التليجرام</p>
+        <button onclick="closeModal()" class="btn-primary w-full py-3 rounded-2xl font-black">حسناً، فهمت</button>
+    </div>
+</div>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyCnkJf-6sAeRJpm34yXLmklLwSxM-GJvUc",
+    authDomain: "my-dash-c78e3.firebaseapp.com",
+    databaseURL: "https://my-dash-c78e3-default-rtdb.firebaseio.com",
+    projectId: "my-dash-c78e3",
+    storageBucket: "my-dash-c78e3.firebasestorage.app",
+    messagingSenderId: "137154835768",
+    appId: "1:137154835768:web:7f396782de1300f9bdfdcd"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+const ADMIN_EMAILS = ["xxetali46@gmail.com", "xxetali47@gmail.com"];
+
+// ========== بصمة الجهاز ==========
+function getDeviceFingerprint() {
+    const data = [navigator.userAgent, navigator.language, screen.width+'x'+screen.height, screen.colorDepth, new Date().getTimezoneOffset(), !!navigator.cookieEnabled, navigator.hardwareConcurrency||'unknown', navigator.deviceMemory||'unknown', navigator.platform||'unknown'].join('|');
+    let hash=0; for(let i=0;i<data.length;i++){const c=data.charCodeAt(i);hash=((hash<<5)-hash)+c;hash=hash&hash;} return 'fp_'+Math.abs(hash).toString(36);
+}
+
+// ========== إشعارات وهمية ==========
+function generateRandomUser(){const l='abcdefghijklmnopqrstuvwxyz',n='0123456789';let nm='';for(let i=0;i<Math.floor(Math.random()*6)+4;i++)nm+=l.charAt(Math.floor(Math.random()*l.length));for(let i=0;i<Math.floor(Math.random()*4)+2;i++)nm+=n.charAt(Math.floor(Math.random()*n.length));return nm;}
+const fakeActions=["ربح","سحب","حقق","جمع","كسب"],fakeAmounts=["$3.50","$5.00","$7.25","$10.00","$12.50","$15.00","$20.00","$25.00","$4.75","$8.30","$6.40","$9.10","$11.20","$13.80","$16.50","$18.00","$22.00","$27.50","$30.00","$35.00","$40.00","$50.00"];
+
+function showFakeNotification(){const u=generateRandomUser(),a=fakeActions[Math.floor(Math.random()*fakeActions.length)],am=fakeAmounts[Math.floor(Math.random()*fakeAmounts.length)],d=document.createElement('div');d.className='fake-notification';d.innerHTML=`<div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center text-white font-black text-xs">💰</div><div><p class="text-xs font-bold text-white">${u} ${a} <span class="text-emerald-400">${am}</span></p><p class="text-[8px] text-slate-500">منذ لحظات 🕐</p></div>`;document.body.appendChild(d);setTimeout(()=>{if(d.parentNode)d.parentNode.removeChild(d);},5000);}
+let fakeNotifInterval=null;
+function startFakeNotifications(){if(fakeNotifInterval)return;setTimeout(showFakeNotification,3000);fakeNotifInterval=setInterval(()=>{setTimeout(showFakeNotification,Math.random()*5000);},12000);}
+function stopFakeNotifications(){if(fakeNotifInterval){clearInterval(fakeNotifInterval);fakeNotifInterval=null;}}
+
+// ========== تسجيل Google ==========
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(result => {
+        const user = result.user;
+        db.ref('users/' + user.uid).once('value').then(snap => {
+            if (!snap.val()) {
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get("r") || "";
+                db.ref('users/' + user.uid).set({
+                    username: user.displayName || user.email.split('@')[0],
+                    email: user.email,
+                    clicks: 0,
                     todayBalance: 0,
-                    withdrawableBalance: Number(((data.withdrawableBalance || 0) + profitToMove).toFixed(2)),
-                    lastResetDate: Date.now()
+                    totalBalance: 0,
+                    withdrawableBalance: 0,
+                    lastResetDay: "",
+                    referralCount: 0,
+                    refEarnings: 0,
+                    referredBy: ref || null,
+                    lastBonusDay: "",
+                    isGoogle: true
                 });
-            }
-        }
-
-        // 2. تحميل وعرض السجلات (حل مشكلة عدم الظهور)
-        function loadWithdrawalHistory(uid) {
-            db.ref('withdrawals').on('value', snap => {
-                const list = document.getElementById('user-withdraw-history');
-                const data = snap.val();
-                list.innerHTML = "";
-
-                if (!data) {
-                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات مسجلة حالياً.</p>";
-                    return;
+                if (ref) {
+                    db.ref('users/' + ref).transaction(d => { if(d){d.referralCount=(d.referralCount||0)+1;} return d; });
+                    db.ref('referrals/' + ref).push(user.uid);
                 }
-
-                // فلترة يدوية في المتصفح لضمان ظهور النتائج فوراً
-                const myWithdraws = Object.keys(data)
-                    .map(key => ({ id: key, ...data[key] }))
-                    .filter(w => w.uid === uid)
-                    .sort((a, b) => b.timestamp - a.timestamp);
-
-                if (myWithdraws.length === 0) {
-                    list.innerHTML = "<p class='text-[10px] text-slate-600 text-center py-4 italic'>لا يوجد سحوبات سابقة.</p>";
-                    return;
-                }
-
-                myWithdraws.forEach(w => {
-                    const sText = w.status === 'paid' ? 'تم الدفع ✅' : 'قيد الانتظار ⏳';
-                    const sColor = w.status === 'paid' ? 'text-emerald-400' : 'text-amber-400';
-                    list.innerHTML += `
-                        <div class="flex justify-between items-center glass-card p-4 rounded-xl border border-slate-800 mb-2 animate-fade-in">
-                            <div class="text-right">
-                                <p class="num-font font-bold text-white text-lg">$${Number(w.amount).toFixed(2)}</p>
-                                <p class="text-[9px] text-slate-500 font-bold">${w.method} | ${new Date(w.timestamp).toLocaleDateString('ar-EG')}</p>
-                            </div>
-                            <div class="text-[10px] font-bold ${sColor} underline italic">${sText}</div>
-                        </div>`;
-                });
-            });
-        }
-
-        function loadData(user) {
-            db.ref('users/' + user.uid).on('value', snap => {
-                const d = snap.val(); if (!d) return;
-                currentUserData = d;
-                checkAndResetDaily(user.uid, d);
-                document.getElementById('stat-today').innerText = `$${(d.todayBalance || 0).toFixed(2)}`;
-                document.getElementById('stat-total').innerText = `$${(d.totalBalance || 0).toFixed(2)}`;
-                document.getElementById('stat-withdrawable').innerText = `$${(d.withdrawableBalance || 0).toFixed(2)}`;
-                document.getElementById('stat-clicks').innerText = d.clicks || 0;
-                document.getElementById('user-welcome').innerText = "مرحباً مروج، " + d.username;
-                document.getElementById('ref-link').value = window.location.origin + window.location.pathname + "?id=" + user.uid;
-            });
-            loadWithdrawalHistory(user.uid);
-        }
-
-        function confirmWithdraw() {
-            const amount = parseFloat(document.getElementById('w-amount').value);
-            const method = document.getElementById('w-method').value;
-            const account = document.getElementById('w-account').value;
-            const contact = document.getElementById('w-contact').value;
-
-            if (amount < 7 || isNaN(amount)) return alert("الحد الأدنى للسحب هو 7$");
-            if (amount > (currentUserData.withdrawableBalance || 0)) return alert("عذراً، رصيدك القابل للسحب حالياً لا يكفي لهذا المبلغ.");
-
-            db.ref('users/' + auth.currentUser.uid).transaction(d => {
-                if (d) d.withdrawableBalance = Number((d.withdrawableBalance - amount).toFixed(2));
-                return d;
-            }).then(() => {
-                db.ref('withdrawals').push({
-                    uid: auth.currentUser.uid,
-                    amount: amount,
-                    method: method,
-                    account: account,
-                    contact: contact,
-                    status: 'pending',
-                    timestamp: Date.now()
-                });
-                alert("✅ تم إرسال طلب السحب بنجاح!\nتتم المراجعة وتأكيد الدفع خلال 24-72 ساعة، يرجى الانتظار.");
-                document.getElementById('w-amount').value = "";
-                document.getElementById('w-account').value = "";
-                document.getElementById('w-contact').value = "";
-            });
-        }
-
-        // معالجة الزيارات والنقرات
-        async function handleVisitor(id) {
-            try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
-                const vIp = ipData.ip.replace(/\./g, '_');
-                const ipRef = db.ref('ip_logs/' + id + '/' + vIp);
-                const userRef = db.ref('users/' + id);
-                const ipSnap = await ipRef.once('value');
-                const now = Date.now();
-
-                if (ipSnap.exists() && (now - ipSnap.val() < 86400000)) {
-                    finalizeRedirect(userRef);
-                } else {
-                    await ipRef.set(now);
-                    await userRef.transaction(d => {
-                        if (d) {
-                            d.clicks = (d.clicks || 0) + 1;
-                            d.todayBalance = Number(((d.todayBalance || 0) + CLICK_PRICE).toFixed(2));
-                            d.totalBalance = Number(((d.totalBalance || 0) + CLICK_PRICE).toFixed(2));
-                        }
-                        return d;
-                    });
-                    finalizeRedirect(userRef);
-                }
-            } catch (e) { window.location.href = DEFAULT_LINK; }
-        }
-
-        async function finalizeRedirect(ref) {
-            const snap = await ref.once('value');
-            const link = (snap.val() && snap.val().marketingLink) ? snap.val().marketingLink : DEFAULT_LINK;
-            setTimeout(() => { window.location.href = link; }, 2000);
-        }
-
-        function copyRef() {
-            const el = document.getElementById('ref-link');
-            el.select();
-            document.execCommand('copy');
-            const toast = document.getElementById('copy-toast');
-            toast.style.opacity = "1";
-            setTimeout(() => toast.style.opacity = "0", 3000);
-        }
-
-        auth.onAuthStateChanged(u => {
-            if (u) { showUI('dashboard-section'); loadData(u); }
-            else { 
-                const p = new URLSearchParams(window.location.search);
-                if (p.get('id')) { document.getElementById('redirect-screen').classList.remove('hidden'); handleVisitor(p.get('id')); }
-                else { showUI('auth-section'); }
             }
         });
+    }).catch(err => showNotification(err.message, "blue"));
+}
 
-        async function handleAuth() {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value, n = document.getElementById('username').value;
-            try {
-                if (isLoginMode) await auth.signInWithEmailAndPassword(e, p);
-                else {
-                    const r = await auth.createUserWithEmailAndPassword(e, p);
-                    await db.ref('users/' + r.user.uid).set({
-                        username: n, email: e, clicks: 0, todayBalance: 0, totalBalance: 0, withdrawableBalance: 0, lastResetDate: Date.now()
-                    });
-                }
-            } catch (err) { alert(err.message); }
-        }
+// ========== دخول بالبريد فقط ==========
+function signInWithEmail() {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('password').value;
+    if (!e || !p) return showNotification("يرجى إدخال البريد وكلمة المرور", "blue");
+    auth.signInWithEmailAndPassword(e, p).catch(err => showNotification(err.message, "blue"));
+}
 
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('username').classList.toggle('hidden', isLoginMode);
-            document.getElementById('auth-btn').innerText = isLoginMode ? "دخول" : "إنشاء حساب";
-            document.getElementById('auth-switch').innerText = isLoginMode ? "سجل حساب جديد" : "لديك حساب؟ سجل دخول";
-        }
+// ========== البانر ==========
+let bannerLink="";
+function loadBanner(){db.ref('settings/banner').on('value',snap=>{const d=snap.val();if(d&&d.text&&d.visible!==false){document.getElementById('top-banner').classList.remove('hidden');document.getElementById('banner-text').innerText=d.text;bannerLink=d.link||"";}else{document.getElementById('top-banner').classList.add('hidden');}});}
+function handleBannerClick(){if(bannerLink&&bannerLink.startsWith('http'))window.open(bannerLink,'_blank');}
+function updateBanner(){const t=document.getElementById('admin-banner-text').value.trim(),l=document.getElementById('admin-banner-link').value.trim();if(!t)return showNotification("يرجى كتابة نص الإعلان","blue");db.ref('settings/banner').set({text:t,link:l||"",visible:true}).then(()=>{showNotification("تم تحديث البانر ✅","green");document.getElementById('admin-banner-text').value="";document.getElementById('admin-banner-link').value="";});}
+function toggleBanner(){db.ref('settings/banner/visible').once('value',snap=>{const c=snap.val();db.ref('settings/banner').update({visible:c===false?true:false});showNotification(c===false?'تم إظهار البانر ✅':'تم إخفاء البانر ✅','green');});}
 
-        function showUI(id) {
-            document.querySelectorAll('#auth-section, #dashboard-section, #nav').forEach(el => el.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            if (id === 'dashboard-section') document.getElementById('nav').classList.remove('hidden');
-        }
+// ========== الضغطات السرية ==========
+let secretTapCount=0,secretTapTimer=null;
+function handleSecretTap(){secretTapCount++;const ind=document.getElementById('secret-indicator');ind.classList.remove('hidden');ind.innerText=`🔒 ${secretTapCount}/7`;clearTimeout(secretTapTimer);secretTapTimer=setTimeout(()=>{secretTapCount=0;ind.classList.add('hidden');},3000);if(secretTapCount===7){secretTapCount=0;ind.classList.add('hidden');const u=auth.currentUser;if(u&&ADMIN_EMAILS.includes(u.email)){const p=document.getElementById('admin-panel');p.classList.toggle('hidden');if(!p.classList.contains('hidden')){loadAdminPanel();showNotification('🔓 تم فتح لوحة التحكم السرية','purple');}else{showNotification('🔒 تم إغلاق لوحة التحكم','blue');}}else{showNotification('⛔ ليس لديك صلاحية الوصول','blue');}}}
 
-        function logout() { auth.signOut(); }
-    </script>
+// ========== المستويات ==========
+const LEVELS={bronze:{min:0,commission:0.02,name:"برونزي",color:"level-bronze",next:50},silver:{min:50,commission:0.03,name:"فضي",color:"level-silver",next:200},gold:{min:200,commission:0.05,name:"ذهبي",color:"level-gold",next:500},diamond:{min:500,commission:0.07,name:"الماسي",color:"level-diamond",next:Infinity}};
+function getUserLevel(c){if(c>=500)return LEVELS.diamond;if(c>=200)return LEVELS.gold;if(c>=50)return LEVELS.silver;return LEVELS.bronze;}
+
+let GLOBAL_REDIRECT_LINK="https://hp.funroom.store/a/8nw6emt2";
+db.ref('settings/redirectLink').on('value',snap=>{if(snap.val()){GLOBAL_REDIRECT_LINK=snap.val();const d=document.getElementById('current-link-display');if(d)d.innerText="الرابط النشط: "+GLOBAL_REDIRECT_LINK;}});
+function updateGlobalLink(){const l=document.getElementById('admin-new-link').value.trim();if(!l.startsWith('http'))return showNotification("يرجى إدخال رابط صحيح يبدأ بـ http","blue");db.ref('settings').update({redirectLink:l}).then(()=>{showNotification("تم تحديث رابط التحويل بنجاح ✅","green");document.getElementById('admin-new-link').value="";});}
+
+function checkAndRedirect(){const p=new URLSearchParams(window.location.search);const refId=p.get("ref");if(refId){if(sessionStorage.getItem('redirecting'))return;sessionStorage.setItem('redirecting','true');document.getElementById('loading-screen').classList.remove('hidden');const fp=getDeviceFingerprint();fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(data=>{const ip=data.ip,uk=ip+'_'+fp;db.ref('clicks_log/'+refId).once('value').then(snap=>{const log=snap.val()||{};if(!Object.values(log).some(e=>e===uk)){db.ref('clicks_log/'+refId).push(uk);db.ref('users/'+refId).once('value').then(us=>{const ud=us.val()||{},lv=getUserLevel(ud.clicks||0),com=lv.commission,today=new Date().toISOString().split('T')[0];db.ref('daily_log/'+refId+'/'+today).transaction(lg=>{if(!lg)lg={date:today,clicks:0,earnings:0,refEarnings:0,clickRate:com};lg.clicks=(lg.clicks||0)+1;lg.earnings=Number(((lg.earnings||0)+com).toFixed(3));lg.clickRate=com;return lg;});db.ref('users/'+refId).transaction(d=>{if(d){d.clicks=(d.clicks||0)+1;d.todayBalance=Number(((d.todayBalance||0)+com).toFixed(2));d.totalBalance=Number(((d.totalBalance||0)+com).toFixed(2));}return d;});if(ud.referredBy){db.ref('users/'+ud.referredBy).transaction(rd=>{if(rd){const rc=Number((com*0.1).toFixed(3));rd.refEarnings=Number(((rd.refEarnings||0)+rc).toFixed(3));rd.todayBalance=Number(((rd.todayBalance||0)+rc).toFixed(2));rd.totalBalance=Number(((rd.totalBalance||0)+rc).toFixed(2));db.ref('daily_log/'+ud.referredBy+'/'+today).transaction(lg=>{if(!lg)lg={date:today,clicks:0,earnings:0,refEarnings:0,clickRate:0};lg.refEarnings=Number(((lg.refEarnings||0)+rc).toFixed(3));return lg;});}return rd;});}});}window.location.replace(GLOBAL_REDIRECT_LINK);});}).catch(()=>{window.location.replace(GLOBAL_REDIRECT_LINK);});}}
+
+function claimDailyBonus(){const u=auth.currentUser;if(!u)return;const today=new Date().toDateString();db.ref('users/'+u.uid+'/lastBonusDay').once('value',snap=>{if(snap.val()===today)return showNotification("لقد حصلت على مكافأتك اليومية مسبقاً ⏰","blue");const bonus=Math.floor(Math.random()*10)+1;db.ref('users/'+u.uid).update({lastBonusDay:today,todayBalance:firebase.database.ServerValue.increment(bonus/100),totalBalance:firebase.database.ServerValue.increment(bonus/100)}).then(()=>{document.getElementById('bonus-btn').classList.add('hidden');showNotification(`🎁 مبروك! ربحت ${bonus} سنت مكافأة يومية`,"green");});});}
+
+function showThemes(){const t=['#050b1a','#1a0505','#051a05','#1a051a'],c=document.body.style.background||'#050b1a',n=t[(t.indexOf(c)+1)%t.length];document.body.style.background=n;localStorage.setItem('theme',n);showNotification('تم تغيير الثيم ✅','purple');}
+const savedTheme=localStorage.getItem('theme');if(savedTheme)document.body.style.background=savedTheme;
+
+function showNotification(msg,type="blue"){const bg=type==='green'?'bg-emerald-600':type==='purple'?'bg-purple-600':'bg-blue-600',d=document.createElement("div");d.className=`fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] px-6 py-4 rounded-2xl text-white font-black text-sm shadow-2xl ${bg}`;d.innerText=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),4000);}
+function closeModal(){document.getElementById('withdraw-modal').classList.add('hidden');}
+
+function checkDailyReset(uid,data){const now=new Date();let rt=new Date();rt.setHours(3,0,0,0);if(now.getHours()<3)rt.setDate(rt.getDate()-1);const lr=data.lastResetDay||"",ts=rt.toDateString();if(lr!==ts){const pm=data.todayBalance||0;db.ref('users/'+uid).update({todayBalance:0,withdrawableBalance:Number(((data.withdrawableBalance||0)+pm).toFixed(2)),lastResetDay:ts});}}
+
+function loadDailyLog(uid){db.ref('daily_log/'+uid).on('value',snap=>{const data=snap.val(),tb=document.getElementById('daily-log-body');if(!data){tb.innerHTML='<tr><td colspan="5" class="p-4 text-center text-slate-500">لا يوجد سجل بعد</td></tr>';return;}const days=Object.keys(data).sort().reverse();tb.innerHTML=days.map(day=>{const lg=data[day];return`<tr class="border-b border-white/5 hover:bg-white/5"><td class="p-2 font-bold text-white">${day}</td><td class="p-2 text-purple-400 font-black">${lg.clicks||0}</td><td class="p-2 text-emerald-400 font-black">$${(lg.earnings||0).toFixed(3)}</td><td class="p-2 text-amber-400 font-black">$${(lg.refEarnings||0).toFixed(3)}</td><td class="p-2 text-blue-400 font-black">${(lg.clickRate||0).toFixed(2)}¢</td></tr>`;}).join('');});}
+
+auth.onAuthStateChanged(u=>{if(u){document.getElementById('auth-section').classList.add('hidden');document.getElementById('dashboard-section').classList.remove('hidden');document.getElementById('nav').classList.remove('hidden');startFakeNotifications();db.ref('users/'+u.uid).on('value',snap=>{const d=snap.val();if(!d)return;checkDailyReset(u.uid,d);const lv=getUserLevel(d.clicks||0);document.getElementById('welcome-msg').innerText=`أهلاً بك، ${d.username||'مروجنا'} ✨`;document.getElementById('user-level').innerText=lv.name;document.getElementById('user-level').className=`text-lg font-black ${lv.color}`;document.getElementById('next-level').innerText=lv.next===Infinity?'أعلى مستوى 🏆':`تحتاج ${lv.next-(d.clicks||0)} نقرة للمستوى التالي`;document.getElementById('stat-today').innerText=`$${(d.todayBalance||0).toFixed(2)}`;document.getElementById('stat-total').innerText=`$${(d.totalBalance||0).toFixed(2)}`;document.getElementById('stat-withdrawable').innerText=`$${(d.withdrawableBalance||0).toFixed(2)}`;document.getElementById('stat-clicks').innerText=d.clicks||0;document.getElementById('stat-referrals').innerText=d.referralCount||0;document.getElementById('stat-ref-earnings').innerText=`$${(d.refEarnings||0).toFixed(2)}`;document.getElementById('short-link').value=window.location.origin+window.location.pathname+"?ref="+u.uid;document.getElementById('ref-link').value=window.location.origin+window.location.pathname+"?r="+u.uid.substring(0,8);const today=new Date().toDateString();if(d.lastBonusDay===today){document.getElementById('bonus-btn').classList.add('hidden');}else{document.getElementById('bonus-btn').classList.remove('hidden');}});renderHistory(u.uid);loadDailyLog(u.uid);loadBanner();}else{document.getElementById('auth-section').classList.remove('hidden');document.getElementById('dashboard-section').classList.add('hidden');document.getElementById('nav').classList.add('hidden');document.getElementById('admin-panel').classList.add('hidden');stopFakeNotifications();}});
+
+function renderHistory(uid){db.ref('withdrawals').on('value',snap=>{const list=document.getElementById('user-withdraw-history'),data=snap.val();list.innerHTML="";if(!data)return;Object.keys(data).reverse().map(k=>({id:k,...data[k]})).filter(w=>w.uid===uid).forEach(w=>{const paid=w.status==="paid";list.innerHTML+=`<div class="glass-card p-4 rounded-2xl flex justify-between items-center border border-white/5"><div class="text-right"><p class="text-lg text-white font-black">$${w.amount}</p><p class="text-[9px] text-slate-500 font-bold italic lowercase">${w.method}</p></div><div class="text-[10px] font-black ${paid?'text-emerald-400':'text-amber-400'}">${paid?'تم الدفع ✅':'قيد المراجعة'}</div></div>`;});});}
+
+function confirmWithdraw(){const amt=parseFloat(document.getElementById('w-amount').value),acc=document.getElementById('w-account').value.trim(),con=document.getElementById('w-contact').value.trim(),met=document.getElementById('w-method').value;if(!amt||amt<7)return showNotification("الحد الأدنى للسحب 7$","blue");const uRef=db.ref('users/'+auth.currentUser.uid);uRef.once('value',snap=>{const bal=snap.val().withdrawableBalance||0;if(amt>bal)return showNotification("رصيدك غير كافٍ","blue");uRef.update({withdrawableBalance:Number((bal-amt).toFixed(2))});db.ref('withdrawals').push({uid:auth.currentUser.uid,username:snap.val().username,amount:amt,method:met,account:acc,contact:con,status:"pending",timestamp:Date.now()}).then(()=>{document.getElementById('withdraw-modal').classList.remove('hidden');document.getElementById('w-amount').value="";document.getElementById('w-account').value="";});});}
+
+function loadAdminPanel(){db.ref('users').on('value',snap=>{const users=snap.val()||{};let tc=0,au=0,te={name:'-',total:0},pc=0;Object.values(users).forEach(u=>{tc+=u.clicks||0;if(u.clicks>0)au++;if((u.totalBalance||0)>te.total){te={name:u.username,total:u.totalBalance};}});document.getElementById('admin-total-clicks').innerText=tc;document.getElementById('admin-active-users').innerText=au;document.getElementById('admin-top-earner').innerText=te.name+' ($'+te.total.toFixed(2)+')';db.ref('withdrawals').on('value',ws=>{const wd=ws.val()||{};pc=Object.values(wd).filter(w=>w.status==='pending').length;document.getElementById('admin-pending-count').innerText=pc;});});db.ref('withdrawals').on('value',snap=>{const cont=document.getElementById('admin-withdrawals');cont.innerHTML="";const data=snap.val();if(!data)return;Object.keys(data).reverse().forEach(key=>{const w=data[key];if(w.status==="paid")return;cont.innerHTML+=`<div class="glass-card p-4 rounded-2xl flex justify-between items-center border-r-4 border-amber-500"><div class="text-right"><h4 class="font-black text-white">${w.username}</h4><p class="text-xs text-amber-400 font-bold">$${w.amount}</p><p class="text-[10px] text-slate-500 uppercase">${w.method} - ${w.account} | ${w.contact}</p></div><button onclick="markAsPaid('${key}')" class="bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-lg">إتمام</button></div>`;});});}
+
+function markAsPaid(id){db.ref('withdrawals/'+id).update({status:"paid"});}
+function copyShortLink(){const t=document.getElementById("short-link");t.select();document.execCommand("copy");showNotification("تم نسخ الرابط التسويقي ✅","blue");}
+function copyReferralLink(){const t=document.getElementById("ref-link");t.select();document.execCommand("copy");showNotification("تم نسخ رابط الإحالة ✅","purple");}
+function logout(){auth.signOut();document.getElementById('admin-panel').classList.add('hidden');secretTapCount=0;stopFakeNotifications();}
+
+checkAndRedirect();
+</script>
 </body>
 </html>
